@@ -1,10 +1,29 @@
 {
-  "devDependencies": {
-    "cypress": "^13.6.0"
+  "name": "telnyx-e2e-cypress",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end UI test suite for telnyx.com built with Cypress and TypeScript",
+  "engines": {
+    "node": ">=20.1"
   },
   "scripts": {
-    "cy:open": "cypress open",
-    "cy:run": "cypress run",
-    "cy:run:cloud": "cypress run --record"
+    "cy:open": "cypress open --e2e",
+    "test": "cypress run",
+    "test:chrome": "cypress run --browser chrome",
+    "test:record": "cypress run --record",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "cypress": "^15.21.1",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-cypress": "^7.0.2",
+    "prettier": "^3.9.10",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.71.2"
   }
 }

@@ -1,0 +1,55 @@
+name: E2E tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Daily run on weekdays to catch regressions on the live site.
+    - cron: '0 6 * * 1-5'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+
+  e2e:
+    needs: static-checks
+    runs-on: ubuntu-latest
+    env:
+      # Optional: set both in repo settings to record runs to Cypress Cloud.
+      CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+      CYPRESS_PROJECT_ID: ${{ vars.CYPRESS_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          record: ${{ env.CYPRESS_RECORD_KEY != '' && env.CYPRESS_PROJECT_ID != '' }}
+      - name: Upload screenshots of failed tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
